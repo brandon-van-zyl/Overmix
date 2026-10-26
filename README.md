@@ -36,7 +36,9 @@ powershell -ExecutionPolicy Bypass -File .\build\pack.ps1
 - Output Switch: flips between two chosen outputs, such as headset and speakers. The mic stays as it is.
 - Now Playing: title, artist, play/pause, next and previous.
 - Settings behind the sliders icon.
-- No taskbar button. Lives in the tray: click to show or hide it, right-click to quit. Starts with Windows (on from the first install; Settings can turn it off), open or hidden as you left it.
+- No taskbar button. Lives in the tray: click to show or hide it, right-click to quit. Windows 11 may tuck the icon under the **^** arrow.
+- Starts with Windows (on from the first install; Settings can turn it off) with the Panel open or hidden as you left it. Started by hand, or by the installer after an update, it always shows the Panel.
+- If Overmix can't start, it says why in a message box and in the log.
 
 ### Overlay (main screen, over the Game)
 

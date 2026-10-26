@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -45,23 +46,44 @@ internal sealed class Shell
 
         _tray = CreateTrayIcon();
         ShowMicMute();
-        if (core.PanelOpen) ShowPanel();
+
+        // Started by hand, or by the installer after an update, it always shows itself. Only a start at
+        // sign-in keeps the Panel the way you left it, which can be hidden in the tray.
+        if (core.PanelOpen || !Program.StartedAtSignIn) ShowPanel();
         else UpdatePanelItem();
     }
 
     public static Shell Start(IClassicDesktopStyleApplicationLifetime desktop)
     {
-        Logging.Start();
         desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+        Dispatcher.UIThread.UnhandledException += (_, e) =>
+        {
+            // One faulty button or event shouldn't take the whole app down, except while the release build checks it.
+            Trace.TraceError($"Overmix: {e.Exception}");
+            e.Handled = !Program.IsSmokeTest;
+        };
 
         var ui = SynchronizationContext.Current ?? new AvaloniaSynchronizationContext();
         var (platform, parts) = WindowsPlatform.WindowsPlatform.Create(ui);
         var core = new OvermixCore(platform, new JsonSettingsStore(JsonSettingsStore.DefaultPath));
 
-        // Starting with Windows is the point of a tray app, so it's on from the first install. Settings can turn it off.
-        if (Program.IsFirstRun) core.StartsWithWindows = true;
+        // Starting with Windows is the point of a tray app, so it's on from the first install; Settings can turn
+        // it off. Setting it again each start keeps the sign-in entry pointing at this version.
+        if (Program.IsFirstRun || core.StartsWithWindows) core.StartsWithWindows = true;
         var shell = new Shell(core, parts, desktop);
         Program.Instance?.ListenForShowPanel(() => Dispatcher.UIThread.Post(shell.ShowPanel));
+
+        if (Program.IsSmokeTest)
+        {
+            DispatcherTimer.RunOnce(
+                () =>
+                {
+                    Trace.TraceInformation("Overmix smoke test: started and ran for 5 seconds");
+                    shell.Quit();
+                },
+                TimeSpan.FromSeconds(5));
+        }
+
         return shell;
     }
 

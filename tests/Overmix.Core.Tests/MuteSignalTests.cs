@@ -19,6 +19,19 @@ public sealed class MuteSignalTests
     }
 
     [Fact]
+    public void No_chime_when_the_mic_is_muted_outside_Overmix()
+    {
+        var core = new OvermixCore(_pc.Platform, _store);
+
+        _pc.Microphones.MuteFromOutside("headset-mic", true);
+        _pc.Microphones.MuteFromOutside("webcam-mic", true);
+
+        Assert.True(core.MicMute.IsOn);
+        Assert.Empty(_pc.MuteChime.Played);
+        Assert.True(_pc.MuteBorder.IsShown);
+    }
+
+    [Fact]
     public void The_Mute_Chime_stays_quiet_when_switched_off()
     {
         var core = new OvermixCore(_pc.Platform, _store) { MuteChimeOn = false };

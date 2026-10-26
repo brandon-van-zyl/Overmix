@@ -39,6 +39,7 @@ internal static unsafe partial class NativeMethods
     public const uint WS_EX_NOACTIVATE = 0x08000000;
     public const int SW_SHOWNOACTIVATE = 4;
     public const uint LWA_ALPHA = 0x2;
+    public const uint MB_ICONERROR = 0x10;
 
     [StructLayout(LayoutKind.Sequential)]
     public struct KBDLLHOOKSTRUCT
@@ -290,6 +291,9 @@ internal static unsafe partial class NativeMethods
     [LibraryImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool ShowWindow(nint window, int command);
+
+    [LibraryImport("user32.dll", EntryPoint = "MessageBoxW", StringMarshalling = StringMarshalling.Utf16)]
+    public static partial int MessageBox(nint owner, string text, string caption, uint type);
 
     public static string WindowText(nint window)
     {

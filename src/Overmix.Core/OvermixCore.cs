@@ -30,10 +30,12 @@ public sealed class OvermixCore
         Apps.Changed += (_, _) => Save();
         OutputSwitch.Changed += (_, _) => Save();
         Shortcuts.Changed += (_, _) => Save();
-        MicMute.Changed += (_, _) =>
+        MicMute.Changed += (_, _) => ShowMuteBorder();
+
+        // Only for your own presses: no chime as Overmix starts and finds the mic already muted.
+        MicMute.Switched += (_, _) =>
         {
             if (_settings.MuteChime) platform.MuteChime.Play(MicMute.IsOn);
-            ShowMuteBorder();
         };
         ShowMuteBorder();
 

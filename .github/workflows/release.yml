@@ -47,6 +47,14 @@ jobs:
       - name: Drop the drawing libraries' debug symbols
         run: Get-ChildItem artifacts/publish -Filter *.pdb | Where-Object Name -NotLike 'Overmix*' | Remove-Item
 
+      - name: Start the real app
+        # It quits by itself after 5 seconds. A crash or a hang stops the release.
+        timeout-minutes: 2
+        run: |
+          $app = Start-Process artifacts/publish/Overmix.exe -ArgumentList '--smoke-test' -PassThru -Wait
+          Get-Content "$env:APPDATA\Overmix\overmix.log" -ErrorAction SilentlyContinue
+          if ($app.ExitCode -ne 0) { throw "Overmix exited with code $($app.ExitCode)" }
+
       - name: Restore vpk
         run: dotnet tool restore
 

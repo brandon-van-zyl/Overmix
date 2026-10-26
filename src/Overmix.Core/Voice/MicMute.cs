@@ -23,21 +23,32 @@ public sealed class MicMute
 
     public bool IsOn { get; private set; }
 
+    /// <summary>Mic Mute turned on or off, for whatever reason, including changes made outside Overmix.</summary>
     public event EventHandler? Changed;
+
+    /// <summary>
+    /// Overmix itself turned Mic Mute on or off, from a Shortcut or a button. Unlike <see cref="Changed"/>, this
+    /// doesn't fire when Overmix merely finds out how the mics are, such as as it starts.
+    /// </summary>
+    public event EventHandler? Switched;
 
     public void Toggle() => Set(!IsOn);
 
     public void Set(bool on)
     {
+        var wasOn = IsOn;
         if (_mics.All.Count == 0)
         {
             // Nothing to mute yet, but a mic plugged in later should follow the choice.
             Update(on);
-            return;
+        }
+        else
+        {
+            foreach (var mic in _mics.All.ToList()) _mics.SetMuted(mic, on);
+            Recheck();
         }
 
-        foreach (var mic in _mics.All.ToList()) _mics.SetMuted(mic, on);
-        Recheck();
+        if (IsOn != wasOn) Switched?.Invoke(this, EventArgs.Empty);
     }
 
     private void Recheck()

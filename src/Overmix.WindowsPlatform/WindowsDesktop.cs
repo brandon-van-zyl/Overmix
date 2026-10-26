@@ -22,7 +22,7 @@ internal sealed class WindowsStartWithWindows : IStartWithWindows
     public void Set(bool on)
     {
         using var key = Registry.CurrentUser.CreateSubKey(RunKey);
-        if (on) key.SetValue(ValueName, $"\"{Environment.ProcessPath}\"");
+        if (on) key.SetValue(ValueName, $"\"{Environment.ProcessPath}\" {WindowsPlatform.StartedAtSignInArgument}");
         else key.DeleteValue(ValueName, throwOnMissingValue: false);
     }
 }
