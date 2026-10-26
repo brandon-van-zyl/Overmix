@@ -65,6 +65,22 @@ public sealed class WindowTests
     }
 
     [AvaloniaFact]
+    public void The_Settings_switch_turns_the_keyboard_hook_off()
+    {
+        _pc.ShortcutKeys.TakenByOtherApps.Add(Shortcut.Parse("Ctrl+Alt+M"));
+        var viewModel = CreateViewModel();
+        viewModel.ToggleSettingsCommand.Execute(null);
+        Assert.True(viewModel.Settings.KeyboardHook);
+        Assert.False(viewModel.Settings.HasShortcutWarning);
+
+        viewModel.Settings.KeyboardHook = false;
+
+        Assert.False(_pc.ShortcutKeys.UseKeyboardHook);
+        Assert.Equal(
+            "Another app already uses Ctrl+Alt+M. Pick a different one, or turn on Catch blocked Shortcuts.", viewModel.Settings.ShortcutWarning);
+    }
+
+    [AvaloniaFact]
     public void Every_key_the_app_records_works_as_a_Shortcut_on_Windows()
     {
         foreach (var key in Enum.GetValues<Key>())

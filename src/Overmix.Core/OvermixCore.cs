@@ -25,7 +25,13 @@ public sealed class OvermixCore
         MicMute = new MicMute(platform.Microphones);
         OutputSwitch = new OutputSwitch(platform.Outputs, ToPair(_settings.OutputFirst, _settings.OutputSecond));
         Shortcuts = new ShortcutDispatcher(
-            platform.ShortcutKeys, Apps, Mixer, MicMute, ToShortcut(_settings.PopupShortcut), ToShortcut(_settings.MicMuteShortcut));
+            platform.ShortcutKeys,
+            Apps,
+            Mixer,
+            MicMute,
+            ToShortcut(_settings.PopupShortcut),
+            ToShortcut(_settings.MicMuteShortcut),
+            _settings.KeyboardHook);
 
         Apps.Changed += (_, _) => Save();
         OutputSwitch.Changed += (_, _) => Save();
@@ -155,6 +161,7 @@ public sealed class OvermixCore
             RemovedApps = _removedApps.Select(ToSettings).ToList(),
             PopupShortcut = Shortcuts.PopupShortcut?.ToString(),
             MicMuteShortcut = Shortcuts.MicMuteShortcut?.ToString(),
+            KeyboardHook = Shortcuts.UseKeyboardHook,
             OutputFirst = OutputSwitch.Pair?.First.Value,
             OutputSecond = OutputSwitch.Pair?.Second.Value,
         };

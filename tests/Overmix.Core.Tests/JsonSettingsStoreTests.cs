@@ -31,6 +31,7 @@ public sealed class JsonSettingsStoreTests : IDisposable
             PanelOpen = false,
             PanelSpot = new WindowSpot(1920, 40),
             PopupShortcut = null,
+            KeyboardHook = false,
             MuteChime = false,
         };
 

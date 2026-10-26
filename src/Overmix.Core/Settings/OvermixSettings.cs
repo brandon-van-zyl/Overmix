@@ -12,6 +12,9 @@ public sealed record OvermixSettings
 
     public string? MicMuteShortcut { get; init; } = "Ctrl+Alt+M";
 
+    /// <summary>Whether a keyboard hook catches Shortcuts that another app uses or a game blocks.</summary>
+    public bool KeyboardHook { get; init; } = true;
+
     public string? OutputFirst { get; init; }
 
     public string? OutputSecond { get; init; }

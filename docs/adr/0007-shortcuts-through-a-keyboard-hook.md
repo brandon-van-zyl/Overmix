@@ -6,3 +6,4 @@ Shortcuts are caught by a low-level keyboard hook on a thread of its own, which 
 
 - Every key press on the PC passes through the hook. It only compares the key with the Shortcuts and passes everything else straight on.
 - A Shortcut wins over another app that uses the same keys; that app no longer gets them.
+- Settings can turn the hook off, for anyone wary of how anti-cheat sees keyboard hooks. Shortcuts then rely on RegisterHotKey alone, so one that another app holds stops working, and Settings says so.

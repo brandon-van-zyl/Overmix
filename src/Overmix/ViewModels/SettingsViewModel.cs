@@ -48,6 +48,9 @@ public sealed partial class SettingsViewModel : ObservableObject
     public partial Shortcut? MicMuteShortcut { get; set; }
 
     [ObservableProperty]
+    public partial bool KeyboardHook { get; set; }
+
+    [ObservableProperty]
     public partial bool MuteChime { get; set; }
 
     [ObservableProperty]
@@ -83,6 +86,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
             PopupShortcut = _core.Shortcuts.PopupShortcut;
             MicMuteShortcut = _core.Shortcuts.MicMuteShortcut;
+            KeyboardHook = _core.Shortcuts.UseKeyboardHook;
             MuteChime = _core.MuteChimeOn;
             MuteBorder = _core.MuteBorderOn;
             StartsWithWindows = _core.StartsWithWindows;
@@ -119,6 +123,11 @@ public sealed partial class SettingsViewModel : ObservableObject
     partial void OnMicMuteShortcutChanged(Shortcut? value)
     {
         if (!_loading) _core.Shortcuts.SetMicMuteShortcut(value);
+    }
+
+    partial void OnKeyboardHookChanged(bool value)
+    {
+        if (!_loading) _core.Shortcuts.UseKeyboardHook = value;
     }
 
     partial void OnMuteChimeChanged(bool value)
@@ -165,9 +174,9 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         var taken = _core.Shortcuts.Unavailable;
         HasShortcutWarning = taken.Count > 0;
-        ShortcutWarning = HasShortcutWarning
-            ? $"{string.Join(", ", taken)} can't be used. Pick a different one."
-            : "";
+        ShortcutWarning = !HasShortcutWarning ? ""
+            : _core.Shortcuts.UseKeyboardHook ? $"{string.Join(", ", taken)} can't be used. Pick a different one."
+            : $"Another app already uses {string.Join(", ", taken)}. Pick a different one, or turn on Catch blocked Shortcuts.";
     }
 }
 

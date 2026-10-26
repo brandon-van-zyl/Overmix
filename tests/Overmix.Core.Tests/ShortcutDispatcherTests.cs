@@ -57,13 +57,42 @@ public sealed class ShortcutDispatcherTests
     }
 
     [Fact]
-    public void Shortcuts_another_app_uses_are_reported_unavailable()
+    public void The_keyboard_hook_catches_a_Shortcut_another_app_uses()
+    {
+        _pc.Microphones.Plug("headset-mic");
+        _pc.ShortcutKeys.TakenByOtherApps.Add(Shortcut.Parse("Ctrl+Alt+M"));
+
+        var (dispatcher, micMute) = CreateDispatcher();
+        _pc.ShortcutKeys.Press("Ctrl+Alt+M");
+
+        Assert.Empty(dispatcher.Unavailable);
+        Assert.True(micMute.IsOn);
+    }
+
+    [Fact]
+    public void Without_the_keyboard_hook_a_Shortcut_another_app_uses_is_unavailable()
     {
         _pc.ShortcutKeys.TakenByOtherApps.Add(Shortcut.Parse("Ctrl+Alt+M"));
 
-        var (dispatcher, _) = CreateDispatcher();
+        var (dispatcher, _) = CreateDispatcher(useKeyboardHook: false);
 
+        Assert.False(_pc.ShortcutKeys.UseKeyboardHook);
         Assert.Equal([Shortcut.Parse("Ctrl+Alt+M")], dispatcher.Unavailable);
+    }
+
+    [Fact]
+    public void Turning_the_keyboard_hook_off_rechecks_every_Shortcut()
+    {
+        _pc.ShortcutKeys.TakenByOtherApps.Add(Shortcut.Parse("Ctrl+Alt+M"));
+        var (dispatcher, _) = CreateDispatcher();
+        var changes = 0;
+        dispatcher.Changed += (_, _) => changes++;
+
+        dispatcher.UseKeyboardHook = false;
+
+        Assert.False(_pc.ShortcutKeys.UseKeyboardHook);
+        Assert.Equal([Shortcut.Parse("Ctrl+Alt+M")], dispatcher.Unavailable);
+        Assert.Equal(1, changes);
     }
 
     [Fact]
@@ -87,12 +116,12 @@ public sealed class ShortcutDispatcherTests
         Assert.DoesNotContain(Shortcut.Parse("Ctrl+Alt+Up"), _pc.ShortcutKeys.Registered);
     }
 
-    private (ShortcutDispatcher Dispatcher, MicMute MicMute) CreateDispatcher()
+    private (ShortcutDispatcher Dispatcher, MicMute MicMute) CreateDispatcher(bool useKeyboardHook = true)
     {
         var mixer = new Mixer(_pc.Sound, _apps, new GameTracker(_pc.MainScreen));
         var micMute = new MicMute(_pc.Microphones);
         var dispatcher = new ShortcutDispatcher(
-            _pc.ShortcutKeys, _apps, mixer, micMute, Shortcut.Parse("Ctrl+Alt+O"), Shortcut.Parse("Ctrl+Alt+M"));
+            _pc.ShortcutKeys, _apps, mixer, micMute, Shortcut.Parse("Ctrl+Alt+O"), Shortcut.Parse("Ctrl+Alt+M"), useKeyboardHook);
         return (dispatcher, micMute);
     }
 }

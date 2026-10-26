@@ -7,16 +7,18 @@ public sealed class FakeShortcutKeys : IShortcutKeys
 {
     private readonly HashSet<Shortcut> _registered = [];
 
-    /// <summary>Shortcuts another app already uses, so registering them fails.</summary>
+    /// <summary>Shortcuts another app already uses. Only the keyboard hook still catches them.</summary>
     public HashSet<Shortcut> TakenByOtherApps { get; } = [];
 
     public IReadOnlyCollection<Shortcut> Registered => _registered;
+
+    public bool UseKeyboardHook { get; set; }
 
     public event EventHandler<Shortcut>? Pressed;
 
     public bool Register(Shortcut shortcut)
     {
-        if (TakenByOtherApps.Contains(shortcut)) return false;
+        if (TakenByOtherApps.Contains(shortcut) && !UseKeyboardHook) return false;
         _registered.Add(shortcut);
         return true;
     }

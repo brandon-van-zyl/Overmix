@@ -14,9 +14,16 @@ public sealed class ShortcutDispatcher
     private readonly Mixer _mixer;
     private readonly MicMute _micMute;
     private Dictionary<Shortcut, Action> _actions = [];
+    private bool _useKeyboardHook;
 
     public ShortcutDispatcher(
-        IShortcutKeys keys, AppList apps, Mixer mixer, MicMute micMute, Shortcut? popupShortcut, Shortcut? micMuteShortcut)
+        IShortcutKeys keys,
+        AppList apps,
+        Mixer mixer,
+        MicMute micMute,
+        Shortcut? popupShortcut,
+        Shortcut? micMuteShortcut,
+        bool useKeyboardHook)
     {
         _keys = keys;
         _apps = apps;
@@ -24,6 +31,7 @@ public sealed class ShortcutDispatcher
         _micMute = micMute;
         PopupShortcut = popupShortcut;
         MicMuteShortcut = micMuteShortcut;
+        _useKeyboardHook = keys.UseKeyboardHook = useKeyboardHook;
         keys.Pressed += (_, shortcut) =>
         {
             if (_actions.TryGetValue(shortcut, out var action)) action();
@@ -35,6 +43,21 @@ public sealed class ShortcutDispatcher
     public Shortcut? PopupShortcut { get; private set; }
 
     public Shortcut? MicMuteShortcut { get; private set; }
+
+    /// <summary>
+    /// Whether a keyboard hook catches Shortcuts that another app already uses or a game blocks. Turned off,
+    /// only Windows' own hotkeys work, and a Shortcut another app uses becomes unavailable.
+    /// </summary>
+    public bool UseKeyboardHook
+    {
+        get => _useKeyboardHook;
+        set
+        {
+            if (value == _useKeyboardHook) return;
+            _useKeyboardHook = _keys.UseKeyboardHook = value;
+            Rebind();
+        }
+    }
 
     /// <summary>Shortcuts the PC wouldn't register, usually because another app already uses them.</summary>
     public IReadOnlyCollection<Shortcut> Unavailable { get; private set; } = [];

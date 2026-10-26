@@ -3,6 +3,7 @@ using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using Overmix.Core;
 using Overmix.Fakes;
 using Overmix.ViewModels;
@@ -37,6 +38,9 @@ public sealed class Screenshots
 
         viewModel.ToggleSettingsCommand.Execute(null);
         Save(panel, "settings.png");
+
+        panel.GetVisualDescendants().OfType<ScrollViewer>().First(scroller => scroller.Content is SettingsView).ScrollToEnd();
+        Save(panel, "settings-end.png");
     }
 
     private static void Save(Window window, string name)

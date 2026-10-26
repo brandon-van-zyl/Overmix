@@ -40,15 +40,16 @@ internal sealed unsafe class WindowsProgramIcons : IProgramIcons, IDisposable
     {
         if (!string.IsNullOrWhiteSpace(knownPath) && File.Exists(knownPath)) yield return knownPath;
 
+        // The process list only gives ids; no program is opened.
         foreach (var process in Process.GetProcessesByName(program.Value))
         {
-            string? path;
+            int id;
             using (process)
             {
-                path = ProcessPath(process.Id);
+                id = process.Id;
             }
 
-            if (path is not null) yield return path;
+            if (ProcessFiles.PathOf(id) is { } path) yield return path;
         }
     }
 

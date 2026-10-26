@@ -16,7 +16,6 @@ internal static unsafe partial class NativeMethods
     public const uint WINEVENT_SKIPOWNPROCESS = 0x0002;
     public const uint MONITOR_DEFAULTTONULL = 0;
     public const uint MONITORINFOF_PRIMARY = 1;
-    public const uint PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
     public const int WH_KEYBOARD_LL = 13;
     public const uint WM_QUIT = 0x0012;
     public const uint WM_KEYDOWN = 0x0100;
@@ -219,17 +218,6 @@ internal static unsafe partial class NativeMethods
     [LibraryImport("kernel32.dll", EntryPoint = "GetModuleHandleW")]
     public static partial nint GetModuleHandle(char* moduleName);
 
-    [LibraryImport("kernel32.dll")]
-    public static partial nint OpenProcess(uint access, [MarshalAs(UnmanagedType.Bool)] bool inheritHandle, uint processId);
-
-    [LibraryImport("kernel32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool CloseHandle(nint handle);
-
-    [LibraryImport("kernel32.dll", EntryPoint = "QueryFullProcessImageNameW")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool QueryFullProcessImageName(nint process, uint flags, char* name, ref uint size);
-
     [LibraryImport("gdi32.dll", EntryPoint = "GetObjectW")]
     public static partial int GetObject(nint gdiObject, int size, void* buffer);
 
@@ -307,22 +295,5 @@ internal static unsafe partial class NativeMethods
         var name = stackalloc char[256];
         var length = GetClassName(window, name, 256);
         return length > 0 ? new string(name, 0, length) : "";
-    }
-
-    /// <summary>The program file a process runs, asking for as little access to it as Windows allows.</summary>
-    public static string? ProcessPath(int processId)
-    {
-        var process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, (uint)processId);
-        if (process == 0) return null;
-        try
-        {
-            var path = stackalloc char[1024];
-            var size = 1024u;
-            return QueryFullProcessImageName(process, 0, path, ref size) ? new string(path, 0, (int)size) : null;
-        }
-        finally
-        {
-            CloseHandle(process);
-        }
     }
 }

@@ -38,7 +38,7 @@ powershell -ExecutionPolicy Bypass -File .\build\pack.ps1
 - Settings behind the sliders icon.
 - No taskbar button. Lives in the tray: click to show or hide it, right-click to quit. Windows 11 may tuck the icon under the **^** arrow.
 - Starts with Windows (on from the first install; Settings can turn it off) with the Panel open or hidden as you left it. Started by hand, or by the installer after an update, it always shows the Panel.
-- If Overmix can't start, it says why in a message box and in the log.
+- If Overmix can't start, it says why in a message box and in the log. Ctrl+C copies the message box's text.
 
 ### Overlay (main screen, over the Game)
 
@@ -53,6 +53,8 @@ These work mid-game without opening anything, even if another app claimed the sa
 - the Popup Shortcut (Ctrl+Alt+O to start with)
 - Mic Mute (Ctrl+Alt+M to start with)
 - volume up and down for any App that has them set (5% per press)
+
+Settings can turn the keyboard hook off. Shortcuts then use only Windows' own hotkeys, and one that another app already uses stops working.
 
 ### Apps and Dials
 
@@ -81,6 +83,14 @@ These work mid-game without opening anything, even if another app claimed the sa
 - The keyboard hook has a thread of its own that does nothing but compare each key with your Shortcuts.
 - The Mute Border is plain Windows strips, drawn once as they appear. While it shows over a game, Windows may add about a frame of delay; turn it off in Settings if that matters to you.
 - It's compiled ahead of time and runs without the background garbage-collector thread.
+
+## How it stays clear of anti-cheat
+
+- It never opens the game, or any other program. Names and icons come from each program's file, found through Windows' list of running processes ([ADR 0008](docs/adr/0008-never-open-another-program.md)).
+- Nothing is injected into the game, and nothing reads or writes its memory.
+- The Overlay is an ordinary window shown over the game, and the Mute Border is a few thin strips at the screen edges.
+- Volumes and mics go through Windows' own audio controls, the same ones its volume mixer uses. Now Playing uses Windows' media controls.
+- The keyboard hook sees every key press, so Settings can turn it off.
 
 ## Later
 
@@ -112,4 +122,4 @@ These work mid-game without opening anything, even if another app claimed the sa
 - Closing the Overlay returns focus and mouse capture to the Game cleanly.
 - Some games go quiet when they lose focus; check each game's "sound in background" setting.
 - The Output Switch uses a private Windows API (IPolicyConfig). Check that headset and speakers really swap.
-- A game's icon needs read access to its process, which anti-cheat may refuse. The Dial then shows the game's first letter.
+- Each game's icon and name show on its Dial without Overmix opening the game.

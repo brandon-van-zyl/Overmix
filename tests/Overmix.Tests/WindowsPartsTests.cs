@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using Overmix.Core.Shortcuts;
@@ -14,6 +15,8 @@ public sealed unsafe partial class WindowsPartsTests
 {
     private const uint InputKeyboard = 1;
     private const uint KeyUp = 0x0002;
+
+    private const int OtherAppsHotkey = 0xB0B;
 
     private static readonly Shortcut TestShortcut = Shortcut.Parse("Ctrl+Alt+Shift+F11");
 
@@ -50,7 +53,7 @@ public sealed unsafe partial class WindowsPartsTests
             try
             {
                 threadId = GetCurrentThreadId();
-                using var keys = new WindowsShortcutKeys(ui: null, useHook: false);
+                using var keys = new WindowsShortcutKeys(ui: null);
                 keys.Pressed += (_, shortcut) =>
                 {
                     if (shortcut == TestShortcut) pressed.Set();
@@ -86,6 +89,56 @@ public sealed unsafe partial class WindowsPartsTests
         {
             PostThreadMessage(threadId, WM_QUIT, 0, 0);
             thread.Join(TimeSpan.FromSeconds(5));
+        }
+    }
+
+    [Fact]
+    public void Only_the_keyboard_hook_catches_a_Shortcut_another_app_holds()
+    {
+        Assert.SkipUnless(OperatingSystem.IsWindows(), "Needs Windows.");
+        Assert.True(KeyCodes.TryGet(TestShortcut.Key, out var key));
+
+        // A hotkey registered without a window belongs to this thread, which stands in for the other app.
+        Assert.True(RegisterHotKey(0, OtherAppsHotkey, MOD_CONTROL | MOD_ALT | MOD_SHIFT, key), "Couldn't hold the Shortcut like another app.");
+        try
+        {
+            using var keys = new WindowsShortcutKeys(new SynchronizationContext());
+
+            keys.UseKeyboardHook = true;
+            Assert.True(keys.Register(TestShortcut), "With the hook on, the Shortcut should still work.");
+            keys.Unregister(TestShortcut);
+
+            keys.UseKeyboardHook = false;
+            Assert.False(keys.UseKeyboardHook);
+            Assert.False(keys.Register(TestShortcut), "With the hook off, the other app keeps the Shortcut.");
+        }
+        finally
+        {
+            UnregisterHotKey(0, OtherAppsHotkey);
+        }
+    }
+
+    [Fact]
+    public void Finds_a_programs_file_without_opening_it()
+    {
+        Assert.SkipUnless(OperatingSystem.IsWindows(), "Needs Windows.");
+
+        Assert.Equal(Environment.ProcessPath, ProcessFiles.PathOf(Environment.ProcessId), ignoreCase: true);
+    }
+
+    [Fact]
+    public void Finds_the_file_of_a_program_Windows_runs_for_itself()
+    {
+        Assert.SkipUnless(OperatingSystem.IsWindows(), "Needs Windows.");
+        var services = Process.GetProcessesByName("svchost");
+        try
+        {
+            Assert.SkipWhen(services.Length == 0, "No Windows services here.");
+            Assert.Equal(Path.Combine(Environment.SystemDirectory, "svchost.exe"), ProcessFiles.PathOf(services[0].Id), ignoreCase: true);
+        }
+        finally
+        {
+            foreach (var service in services) service.Dispose();
         }
     }
 

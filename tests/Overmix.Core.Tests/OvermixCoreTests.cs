@@ -77,6 +77,27 @@ public sealed class OvermixCoreTests
     }
 
     [Fact]
+    public void The_keyboard_hook_is_on_from_the_start()
+    {
+        var core = new OvermixCore(_pc.Platform, _store);
+
+        Assert.True(core.Shortcuts.UseKeyboardHook);
+        Assert.True(_pc.ShortcutKeys.UseKeyboardHook);
+    }
+
+    [Fact]
+    public void Turning_the_keyboard_hook_off_is_remembered()
+    {
+        var core = new OvermixCore(_pc.Platform, _store);
+
+        core.Shortcuts.UseKeyboardHook = false;
+
+        Assert.False(_store.Saved.KeyboardHook);
+        Assert.False(new OvermixCore(_pc.Platform, _store).Shortcuts.UseKeyboardHook);
+        Assert.False(_pc.ShortcutKeys.UseKeyboardHook);
+    }
+
+    [Fact]
     public void An_Apps_program_path_is_remembered_for_its_icon()
     {
         var core = new OvermixCore(_pc.Platform, _store);

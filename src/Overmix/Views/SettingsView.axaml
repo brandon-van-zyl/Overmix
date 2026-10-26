@@ -70,6 +70,10 @@
       <TextBlock Classes="warning" Text="{Binding ShortcutWarning}" IsVisible="{Binding HasShortcutWarning}" TextWrapping="Wrap" />
       <TextBlock Classes="secondary" TextWrapping="Wrap" Margin="4,0"
                  Text="Click a box, then press the keys. Backspace clears it." />
+      <ToggleSwitch IsChecked="{Binding KeyboardHook}" OnContent="Catch blocked Shortcuts"
+                    OffContent="Catch blocked Shortcuts" Margin="4,0" />
+      <TextBlock Classes="secondary" TextWrapping="Wrap" Margin="4,0"
+                 Text="A keyboard hook catches Shortcuts that another app or a game blocks. Turned off, Overmix uses only Windows' own hotkeys." />
     </StackPanel>
 
     <StackPanel Spacing="10">

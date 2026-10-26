@@ -48,10 +48,21 @@ internal static class Program
         {
             // Without this, a failed start would just disappear.
             Trace.TraceError($"Overmix couldn't start: {e}");
-            if (!IsSmokeTest)
-                WindowsPlatform.WindowsPlatform.ShowError($"Overmix couldn't start:\n\n{e.Message}\n\nThe details are in {Logging.Path}");
+            if (!IsSmokeTest) WindowsPlatform.WindowsPlatform.ShowError(StartFailedMessage(e, Logging.Path));
             return 1;
         }
+    }
+
+    /// <summary>
+    /// The error and the first places it passed through, short enough for a message box. Windows copies a
+    /// message box's text with Ctrl+C, so it can be pasted straight into a bug report.
+    /// </summary>
+    internal static string StartFailedMessage(Exception e, string logPath)
+    {
+        const int MaxLines = 16;
+        var lines = e.ToString().Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var details = string.Join('\n', lines.Take(MaxLines)) + (lines.Length > MaxLines ? "\n…" : "");
+        return $"Overmix couldn't start.\n\n{details}\n\nPress Ctrl+C to copy this message. Everything is in {logPath}";
     }
 
     public static AppBuilder BuildAvaloniaApp() =>

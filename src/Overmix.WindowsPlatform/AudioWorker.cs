@@ -298,13 +298,13 @@ internal sealed class AudioWorker : IDisposable
     {
         try
         {
-            if (NativeMethods.ProcessPath(processId) is { } path
+            if (ProcessFiles.PathOf(processId) is { } path
                 && FileVersionInfo.GetVersionInfo(path).FileDescription is { Length: > 0 } description)
                 return description.Trim();
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or ArgumentException)
         {
-            // Some programs, like games guarded by anti-cheat, won't say; their process name will do.
+            // A program whose file can't be read; its process name will do.
         }
 
         return Pretty(processName);

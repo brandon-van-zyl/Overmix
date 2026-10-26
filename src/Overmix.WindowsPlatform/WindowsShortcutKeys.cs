@@ -9,6 +9,7 @@ namespace Overmix.WindowsPlatform;
 /// Listens for Shortcuts two ways: a keyboard hook, which catches them even when another app has claimed the
 /// same keys or a game turns hotkeys off, and Windows' RegisterHotKey, which still works while an app running
 /// as administrator has focus (the hook can't see keys then). Neither does anything until a key is pressed.
+/// Settings can turn the hook off.
 /// </summary>
 internal sealed unsafe class WindowsShortcutKeys : IShortcutKeys, IDisposable
 {
@@ -17,17 +18,19 @@ internal sealed unsafe class WindowsShortcutKeys : IShortcutKeys, IDisposable
 
     private static WindowsShortcutKeys? _instance;
 
-    private readonly KeyboardHook? _hook;
+    private readonly SynchronizationContext? _ui;
     private readonly nint _window;
     private readonly HashSet<Shortcut> _listening = [];
     private readonly Dictionary<Shortcut, int> _hotkeyIds = [];
     private readonly Dictionary<int, Shortcut> _hotkeys = [];
     private readonly Dictionary<Shortcut, long> _lastPressed = [];
+    private KeyboardHook? _hook;
     private int _nextId = 1;
 
-    /// <param name="ui">Where Pressed is raised. Without it there's no hook: only Windows' hotkeys.</param>
-    public WindowsShortcutKeys(SynchronizationContext? ui, bool useHook = true)
+    /// <param name="ui">Where the keyboard hook's presses are raised. Without it there's no hook: only Windows' hotkeys.</param>
+    public WindowsShortcutKeys(SynchronizationContext? ui)
     {
+        _ui = ui;
         _instance = this;
         fixed (char* name = "OvermixShortcuts")
         {
@@ -44,7 +47,30 @@ internal sealed unsafe class WindowsShortcutKeys : IShortcutKeys, IDisposable
         }
 
         if (_window == 0) Trace.TraceError($"Overmix shortcuts: no message window (error {Marshal.GetLastPInvokeError()})");
-        if (useHook && ui is not null) _hook = new KeyboardHook(shortcut => ui.Post(_ => Fire(shortcut), null));
+    }
+
+    public bool UseKeyboardHook
+    {
+        get => _hook is not null;
+        set
+        {
+            if (value && _hook is null && _ui is { } ui)
+            {
+                _hook = new KeyboardHook(shortcut => ui.Post(_ => Fire(shortcut), null));
+                _hook.SetShortcuts(_listening);
+            }
+            else if (!value && _hook is not null)
+            {
+                _hook.Dispose();
+                _hook = null;
+            }
+            else
+            {
+                return;
+            }
+
+            Trace.TraceInformation($"Overmix shortcuts: keyboard hook {(value ? "on" : "off")}");
+        }
     }
 
     public event EventHandler<Shortcut>? Pressed;
