@@ -46,7 +46,7 @@ powershell -ExecutionPolicy Bypass -File .\build\pack.ps1
 
 ### Shortcuts
 
-These work mid-game without opening anything:
+These work mid-game without opening anything, even if another app claimed the same keys or a game turns hotkeys off ([ADR 0007](docs/adr/0007-shortcuts-through-a-keyboard-hook.md)):
 
 - the Popup Shortcut (Ctrl+Alt+O to start with)
 - Mic Mute (Ctrl+Alt+M to start with)
@@ -54,16 +54,20 @@ These work mid-game without opening anything:
 
 ### Apps and Dials
 
-- You build your App list, for example Discord and Spotify. Programs not on the list are ignored.
-- Add an App by picking from programs that are playing sound now, or by browsing to the program.
-- Each Dial shows its program's icon, the same art as its desktop shortcut.
+- Every program that plays sound gets a Dial by itself, like in Windows' volume mixer. Overmix's own sounds and Windows' shell don't.
+- Remove the ones you don't want in Settings. They stay removed, and Settings can bring them back with their old setup.
+- Add a program before it has ever played sound by browsing to it.
+- Each Dial shows its program's icon and name, the same as its desktop shortcut.
 - A Dial is greyed out until its App is Connected, then lights up by itself.
-- The Game Dial follows the Game: the most recent program to fill the main screen that isn't an App.
+- The Game Dial comes first and follows the Game: the most recent program to fill the main screen. While a program is the Game, its own App Dial steps aside, so it never has two.
 - Scroll, drag or use the arrow keys on a Dial. There's no separate mute per App: a Dial at zero silences it.
 
 ### Mic Mute
 
 - Mutes every microphone in Windows, including one plugged in while muted. It never changes what you hear.
+- The Mute Chime plays two falling notes as you mute and two rising notes as you unmute.
+- The Mute Border puts a thin red line around every screen while you're muted. Clicks go straight through it, and it never takes focus from the game.
+- Settings can turn the chime and the border off.
 - Always shows the real Windows state, whatever changed it, and stays muted if Overmix closes.
 - No Discord connection in v1, so friends hear silence rather than seeing a mute icon.
 
@@ -72,6 +76,8 @@ These work mid-game without opening anything:
 - It never checks for changes on a timer. Windows tells Overmix when sound, devices, mic mute, the focused window, media or Shortcuts change, and it sleeps in between ([ADR 0006](docs/adr/0006-react-to-windows-never-poll.md)).
 - Nothing redraws unless something on screen changed, and nothing animates.
 - One background thread does all the audio work and another reads icons. Each icon is read once.
+- The keyboard hook has a thread of its own that does nothing but compare each key with your Shortcuts.
+- The Mute Border is plain Windows strips, drawn once as they appear. While it shows over a game, Windows may add about a frame of delay; turn it off in Settings if that matters to you.
 - It's compiled ahead of time and runs without the background garbage-collector thread.
 
 ## Later
@@ -99,7 +105,8 @@ These work mid-game without opening anything:
 ## Risks to test first on the PC
 
 - The Overlay shows over Valorant, CS2 and Overwatch in borderless mode with their anti-cheat running.
-- Shortcuts fire while each game has focus. Some games block normal shortcuts, so a keyboard-hook fallback may be needed.
+- Shortcuts fire while each game has focus. A game running as administrator hides keys from the keyboard hook; Windows' own hotkeys still cover Ctrl or Alt combinations there.
+- The Mute Border shows over each game and doesn't upset its anti-cheat.
 - Closing the Overlay returns focus and mouse capture to the Game cleanly.
 - Some games go quiet when they lose focus; check each game's "sound in background" setting.
 - The Output Switch uses a private Windows API (IPolicyConfig). Check that headset and speakers really swap.

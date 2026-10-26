@@ -27,7 +27,7 @@ _Avoid_: Overlay key, toggle key
 ### Sound
 
 **App**:
-A program on your list whose sound you control, such as Discord or Spotify. Programs not on the list are ignored.
+A program whose sound you control, such as Discord or Spotify, with its own Dial. Every program that plays sound becomes an App by itself, unless you've removed it; removed Apps stay removed until you bring them back.
 _Avoid_: Application, program, source
 
 **Dial**:
@@ -39,11 +39,11 @@ An App that is running and using sound, so its Dial works. A Dial whose App isn'
 _Avoid_: Active, running, live, online
 
 **Game**:
-The most recent program to fill the main screen, other than an App. It stays the Game while the Overlay is open, until you quit it.
+The most recent program to fill the main screen. It stays the Game while the Overlay is open, until you quit it or another program fills the screen.
 _Avoid_: Foreground app, current app
 
 **Game Dial**:
-The Dial that always controls the Game, so games never need adding to the list.
+The Dial that always controls the Game, first in line. While a program is the Game, its own App Dial steps aside for it.
 _Avoid_: Game slot, auto dial
 
 **Output Switch**:
@@ -59,3 +59,11 @@ _Avoid_: Media player, music widget
 **Mic Mute**:
 Every microphone on the PC muted in Windows itself, so no app can hear you: not Discord, not in-game voice chat, nothing. It never changes what you hear.
 _Avoid_: Mute (on its own), mic off
+
+**Mute Chime**:
+The short sound as Mic Mute turns on (two falling notes) or off (two rising notes).
+_Avoid_: Beep, mute sound
+
+**Mute Border**:
+A red border around every screen while Mic Mute is on.
+_Avoid_: Red frame, mute overlay

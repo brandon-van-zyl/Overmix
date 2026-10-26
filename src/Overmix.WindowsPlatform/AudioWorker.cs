@@ -29,6 +29,11 @@ internal sealed class AudioWorker : IDisposable
     /// <summary>A slow look now and then, in case Windows ever misses telling us about a change.</summary>
     private static readonly TimeSpan SafetyNet = TimeSpan.FromSeconds(30);
 
+    /// <summary>Windows' own programs, which sometimes make sound but aren't anything you'd want a Dial for.</summary>
+    private static readonly HashSet<string> WindowsShell = new(
+        ["explorer", "ShellExperienceHost", "StartMenuExperienceHost", "SystemSettings", "SndVol", "SearchHost", "TextInputHost", "LockApp"],
+        StringComparer.OrdinalIgnoreCase);
+
     private readonly SynchronizationContext _ui;
     private readonly ComThread _thread = new("Overmix audio", ApartmentState.MTA);
     private readonly Timer _settle;
@@ -205,12 +210,16 @@ internal sealed class AudioWorker : IDisposable
                 try
                 {
                     if (control.IsSystemSoundsSession || control.State == AudioSessionState.AudioSessionStateExpired) continue;
+                    var processId = (int)control.GetProcessID;
+
+                    // Overmix's own sounds, like the Mute Chime, aren't one of your programs.
+                    if (processId == Environment.ProcessId) continue;
                     var id = control.GetSessionInstanceIdentifier;
                     present.Add(id);
                     if (_sessions.ContainsKey(id)) continue;
-                    if (_processNames.Find((int)control.GetProcessID) is not { } name) continue;
+                    if (_processNames.Find(processId) is not { } name || WindowsShell.Contains(name)) continue;
                     control.RegisterEventClient(_sessionEvents);
-                    _sessions[id] = new TrackedSession(control, new ProgramName(name), Pretty(name));
+                    _sessions[id] = new TrackedSession(control, new ProgramName(name), FriendlyName(processId, name));
                     keep = true;
                 }
                 catch (Exception e) when (IsAudioError(e))
@@ -282,6 +291,23 @@ internal sealed class AudioWorker : IDisposable
         _mics.Clear();
         Try(() => _deviceEvents?.Dispose());
         Try(() => _enumerator?.Dispose());
+    }
+
+    /// <summary>The name people know a program by, like "Google Chrome" for chrome, from its file's description.</summary>
+    private static string FriendlyName(int processId, string processName)
+    {
+        try
+        {
+            if (NativeMethods.ProcessPath(processId) is { } path
+                && FileVersionInfo.GetVersionInfo(path).FileDescription is { Length: > 0 } description)
+                return description.Trim();
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            // Some programs, like games guarded by anti-cheat, won't say; their process name will do.
+        }
+
+        return Pretty(processName);
     }
 
     /// <summary>"chrome" reads better as "Chrome"; names with capitals are left alone.</summary>

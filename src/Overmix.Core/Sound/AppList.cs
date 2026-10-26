@@ -1,6 +1,6 @@
 namespace Overmix.Core.Sound;
 
-/// <summary>Your list of Apps, in the order their Dials appear. Programs not on it are ignored.</summary>
+/// <summary>Your list of Apps, in the order their Dials appear.</summary>
 public sealed class AppList
 {
     // Replaced, never changed in place, so anyone looping over Items is safe even if the list changes meanwhile.

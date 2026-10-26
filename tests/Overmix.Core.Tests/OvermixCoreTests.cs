@@ -14,7 +14,7 @@ public sealed class OvermixCoreTests
     {
         var core = new OvermixCore(_pc.Platform, _store);
 
-        Assert.Equal(["Discord", "Spotify", "Chrome"], core.Apps.Items.Select(app => app.Name));
+        Assert.Equal(["Discord", "Spotify", "Chrome"], core.Apps.Items.Take(3).Select(app => app.Name));
         Assert.Equal(Shortcut.Parse("Ctrl+Alt+Up"), core.Apps.Items[0].VolumeUp);
         Assert.Equal(Shortcut.Parse("Ctrl+Alt+O"), core.Shortcuts.PopupShortcut);
         Assert.Equal("Speakers", core.OutputSwitch.Other?.Name);
@@ -31,11 +31,39 @@ public sealed class OvermixCoreTests
     }
 
     [Fact]
-    public void Programs_to_add_are_those_using_sound_that_arent_Apps_yet()
+    public void Programs_playing_sound_become_Apps_by_themselves()
     {
         var core = new OvermixCore(_pc.Platform, _store);
 
-        Assert.Equal(["VALORANT"], core.ProgramsToAdd.Select(program => program.Name));
+        _pc.Sound.Start("obs64", name: "OBS Studio");
+
+        Assert.Equal(["Discord", "Spotify", "Chrome", "VALORANT", "OBS Studio"], core.Apps.Items.Select(app => app.Name));
+        Assert.Contains(_store.Saved.Apps, app => app.Program == "obs64");
+    }
+
+    [Fact]
+    public void A_removed_App_doesnt_come_back_by_itself()
+    {
+        var core = new OvermixCore(_pc.Platform, _store);
+
+        core.RemoveApp(new("Spotify"));
+        _pc.Sound.Stop("Spotify");
+        _pc.Sound.Start("Spotify");
+
+        Assert.False(core.Apps.Contains(new("Spotify")));
+        Assert.False(new OvermixCore(_pc.Platform, _store).Apps.Contains(new("Spotify")));
+    }
+
+    [Fact]
+    public void A_removed_App_comes_back_with_its_setup()
+    {
+        var core = new OvermixCore(_pc.Platform, _store);
+        core.RemoveApp(new("Discord"));
+
+        core.AddApp(core.RemovedApps.Single());
+
+        Assert.Equal(Shortcut.Parse("Ctrl+Alt+Up"), core.Apps.Find(new("Discord"))?.VolumeUp);
+        Assert.Empty(core.RemovedApps);
     }
 
     [Fact]

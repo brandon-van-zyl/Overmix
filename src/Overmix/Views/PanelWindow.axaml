@@ -49,7 +49,7 @@
             </ItemsControl.ItemTemplate>
           </ItemsControl>
           <TextBlock Classes="secondary" IsVisible="{Binding HasNoApps}" TextWrapping="Wrap" TextAlignment="Center" Margin="12,4"
-                     Text="Add Discord, Spotify and your other apps in Settings to give each one a Dial." />
+                     Text="Apps get a Dial here by themselves as soon as they play sound." />
         </StackPanel>
 
         <Border Classes="card">

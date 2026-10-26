@@ -10,6 +10,7 @@ namespace Overmix.Core;
 public sealed class OvermixCore
 {
     private readonly ISettingsStore _store;
+    private readonly List<App> _removedApps;
     private OvermixSettings _settings;
 
     public OvermixCore(Platform platform, ISettingsStore store)
@@ -18,7 +19,8 @@ public sealed class OvermixCore
         _settings = store.Load();
         Platform = platform;
         Apps = new AppList(_settings.Apps.Select(ToApp).OfType<App>());
-        Game = new GameTracker(platform.MainScreen, Apps);
+        _removedApps = _settings.RemovedApps.Select(ToApp).OfType<App>().ToList();
+        Game = new GameTracker(platform.MainScreen);
         Mixer = new Mixer(platform.Sound, Apps, Game);
         MicMute = new MicMute(platform.Microphones);
         OutputSwitch = new OutputSwitch(platform.Outputs, ToPair(_settings.OutputFirst, _settings.OutputSecond));
@@ -28,6 +30,15 @@ public sealed class OvermixCore
         Apps.Changed += (_, _) => Save();
         OutputSwitch.Changed += (_, _) => Save();
         Shortcuts.Changed += (_, _) => Save();
+        MicMute.Changed += (_, _) =>
+        {
+            if (_settings.MuteChime) platform.MuteChime.Play(MicMute.IsOn);
+            ShowMuteBorder();
+        };
+        ShowMuteBorder();
+
+        platform.Sound.Started += (_, _) => AddNewPrograms();
+        AddNewPrograms();
     }
 
     public Platform Platform { get; }
@@ -59,6 +70,24 @@ public sealed class OvermixCore
         set => Save(_settings with { PanelOpen = value });
     }
 
+    /// <summary>Whether the Mute Chime plays as Mic Mute turns on or off.</summary>
+    public bool MuteChimeOn
+    {
+        get => _settings.MuteChime;
+        set => Save(_settings with { MuteChime = value });
+    }
+
+    /// <summary>Whether the Mute Border shows while Mic Mute is on.</summary>
+    public bool MuteBorderOn
+    {
+        get => _settings.MuteBorder;
+        set
+        {
+            Save(_settings with { MuteBorder = value });
+            ShowMuteBorder();
+        }
+    }
+
     public WindowSpot? PanelSpot
     {
         get => _settings.PanelSpot;
@@ -79,12 +108,40 @@ public sealed class OvermixCore
         if (Apps.Find(program) is { } app && app.Path != path) Apps.Update(app with { Path = path });
     }
 
-    /// <summary>Programs using sound right now that aren't Apps yet: the choices for adding one.</summary>
-    public IReadOnlyList<SoundProgram> ProgramsToAdd =>
-        Platform.Sound.UsingSound
-            .Where(program => !Apps.Contains(program.Program))
-            .OrderBy(program => program.Name, StringComparer.CurrentCultureIgnoreCase)
-            .ToList();
+    /// <summary>Apps you removed, which don't come back by themselves.</summary>
+    public IReadOnlyList<App> RemovedApps => _removedApps;
+
+    /// <summary>Takes an App off the list for good: it won't be added again when its program next plays sound.</summary>
+    public void RemoveApp(ProgramName program)
+    {
+        if (Apps.Find(program) is not { } app) return;
+        _removedApps.RemoveAll(removed => removed.Program == program);
+        _removedApps.Add(app);
+        Apps.Remove(program);
+    }
+
+    /// <summary>Adds an App by hand: one removed earlier, with its old setup, or a program chosen with Browse.</summary>
+    public void AddApp(App app)
+    {
+        _removedApps.RemoveAll(removed => removed.Program == app.Program);
+        if (!Apps.Add(app)) Save();
+    }
+
+    /// <summary>Every program using sound becomes an App, like Windows' volume mixer, unless you've removed it.</summary>
+    private void AddNewPrograms()
+    {
+        foreach (var program in Platform.Sound.UsingSound)
+        {
+            if (!Apps.Contains(program.Program) && !_removedApps.Exists(removed => removed.Program == program.Program))
+                Apps.Add(new App(program.Program, program.Name));
+        }
+    }
+
+    private void ShowMuteBorder()
+    {
+        if (MicMute.IsOn && _settings.MuteBorder) Platform.MuteBorder.Show();
+        else Platform.MuteBorder.Hide();
+    }
 
     private void Save() => Save(_settings);
 
@@ -92,10 +149,8 @@ public sealed class OvermixCore
     {
         _settings = settings with
         {
-            Apps = Apps.Items
-                .Select(app => new AppSettings(
-                    app.Program.Value, app.Name, app.VolumeUp?.ToString(), app.VolumeDown?.ToString(), app.Path))
-                .ToList(),
+            Apps = Apps.Items.Select(ToSettings).ToList(),
+            RemovedApps = _removedApps.Select(ToSettings).ToList(),
             PopupShortcut = Shortcuts.PopupShortcut?.ToString(),
             MicMuteShortcut = Shortcuts.MicMuteShortcut?.ToString(),
             OutputFirst = OutputSwitch.Pair?.First.Value,
@@ -103,6 +158,9 @@ public sealed class OvermixCore
         };
         _store.Save(_settings);
     }
+
+    private static AppSettings ToSettings(App app) =>
+        new(app.Program.Value, app.Name, app.VolumeUp?.ToString(), app.VolumeDown?.ToString(), app.Path);
 
     private static App? ToApp(AppSettings settings)
     {

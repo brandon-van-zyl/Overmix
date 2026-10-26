@@ -27,8 +27,12 @@ public sealed class FakePc
 
     public FakeProgramIcons Icons { get; } = new();
 
+    public FakeMuteChime MuteChime { get; } = new();
+
+    public FakeMuteBorder MuteBorder { get; } = new();
+
     public Platform Platform =>
-        new(Sound, MainScreen, Microphones, Outputs, NowPlaying, ShortcutKeys, StartWithWindows, GameFocus, Icons);
+        new(Sound, MainScreen, Microphones, Outputs, NowPlaying, ShortcutKeys, StartWithWindows, GameFocus, Icons, MuteChime, MuteBorder);
 
     /// <summary>VALORANT running borderless, Discord and Spotify playing, a headset and speakers plugged in.</summary>
     public static FakePc GamingEvening()

@@ -17,6 +17,51 @@ internal static unsafe partial class NativeMethods
     public const uint MONITOR_DEFAULTTONULL = 0;
     public const uint MONITORINFOF_PRIMARY = 1;
     public const uint PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
+    public const int WH_KEYBOARD_LL = 13;
+    public const uint WM_QUIT = 0x0012;
+    public const uint WM_KEYDOWN = 0x0100;
+    public const uint WM_KEYUP = 0x0101;
+    public const uint WM_SYSKEYDOWN = 0x0104;
+    public const uint WM_SYSKEYUP = 0x0105;
+    public const int VK_SHIFT = 0x10;
+    public const int VK_CONTROL = 0x11;
+    public const int VK_MENU = 0x12;
+    public const int VK_LWIN = 0x5B;
+    public const int VK_RWIN = 0x5C;
+    public const uint SND_ASYNC = 0x0001;
+    public const uint SND_NODEFAULT = 0x0002;
+    public const uint SND_MEMORY = 0x0004;
+    public const uint WS_POPUP = 0x80000000;
+    public const uint WS_EX_TOPMOST = 0x00000008;
+    public const uint WS_EX_TRANSPARENT = 0x00000020;
+    public const uint WS_EX_TOOLWINDOW = 0x00000080;
+    public const uint WS_EX_LAYERED = 0x00080000;
+    public const uint WS_EX_NOACTIVATE = 0x08000000;
+    public const int SW_SHOWNOACTIVATE = 4;
+    public const uint LWA_ALPHA = 0x2;
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct KBDLLHOOKSTRUCT
+    {
+        public uint vkCode;
+        public uint scanCode;
+        public uint flags;
+        public uint time;
+        public nuint dwExtraInfo;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MSG
+    {
+        public nint hwnd;
+        public uint message;
+        public nint wParam;
+        public nint lParam;
+        public uint time;
+        public int ptX;
+        public int ptY;
+        public uint lPrivate;
+    }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct RECT
@@ -193,6 +238,58 @@ internal static unsafe partial class NativeMethods
     [LibraryImport("gdi32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool DeleteObject(nint gdiObject);
+
+    [LibraryImport("user32.dll", EntryPoint = "SetWindowsHookExW", SetLastError = true)]
+    public static partial nint SetWindowsHookEx(int hookId, delegate* unmanaged<int, nint, nint, nint> callback, nint module, uint threadId);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool UnhookWindowsHookEx(nint hook);
+
+    [LibraryImport("user32.dll")]
+    public static partial nint CallNextHookEx(nint hook, int code, nint wParam, nint lParam);
+
+    [LibraryImport("user32.dll")]
+    public static partial short GetAsyncKeyState(int virtualKey);
+
+    [LibraryImport("user32.dll", EntryPoint = "GetMessageW")]
+    public static partial int GetMessage(MSG* message, nint window, uint filterMin, uint filterMax);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool TranslateMessage(MSG* message);
+
+    [LibraryImport("user32.dll", EntryPoint = "DispatchMessageW")]
+    public static partial nint DispatchMessage(MSG* message);
+
+    [LibraryImport("user32.dll", EntryPoint = "PostThreadMessageW")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool PostThreadMessage(uint threadId, uint message, nint wParam, nint lParam);
+
+    [LibraryImport("kernel32.dll")]
+    public static partial uint GetCurrentThreadId();
+
+    [LibraryImport("winmm.dll", EntryPoint = "PlaySoundW")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool PlaySound(void* sound, nint module, uint flags);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool EnumDisplayMonitors(nint deviceContext, RECT* clip, delegate* unmanaged<nint, nint, RECT*, nint, int> callback, nint data);
+
+    [LibraryImport("shcore.dll")]
+    public static partial int GetDpiForMonitor(nint monitor, int dpiType, out uint dpiX, out uint dpiY);
+
+    [LibraryImport("gdi32.dll")]
+    public static partial nint CreateSolidBrush(uint color);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool SetLayeredWindowAttributes(nint window, uint colorKey, byte alpha, uint flags);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool ShowWindow(nint window, int command);
 
     public static string WindowText(nint window)
     {

@@ -12,9 +12,10 @@ public static class WindowsPlatform
     {
         var audio = new AudioWorker(ui);
         var mainScreen = new WindowsMainScreen(ui);
-        var shortcutKeys = new WindowsShortcutKeys();
+        var shortcutKeys = new WindowsShortcutKeys(ui);
         var nowPlaying = new WindowsNowPlaying(ui);
         var icons = new WindowsProgramIcons();
+        var muteBorder = new WindowsMuteBorder();
         var platform = new Platform(
             new WindowsProgramSound(audio),
             mainScreen,
@@ -24,8 +25,10 @@ public static class WindowsPlatform
             shortcutKeys,
             new WindowsStartWithWindows(),
             new WindowsGameFocus(),
-            icons);
-        return (platform, new Parts([icons, nowPlaying, shortcutKeys, mainScreen, audio]));
+            icons,
+            new WindowsMuteChime(),
+            muteBorder);
+        return (platform, new Parts([muteBorder, icons, nowPlaying, shortcutKeys, mainScreen, audio]));
     }
 
     /// <summary>Stops Overmix starting with Windows. Used when it's uninstalled.</summary>

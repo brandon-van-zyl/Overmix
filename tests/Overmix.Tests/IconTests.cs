@@ -26,6 +26,6 @@ public sealed class IconTests
 
         viewModel.ToggleSettingsCommand.Execute(null);
 
-        Assert.Equal(["Discord", "Spotify", "Chrome"], viewModel.Settings.Apps.Select(row => row.Name));
+        Assert.Equal(["Discord", "Spotify", "Chrome", "VALORANT"], viewModel.Settings.Apps.Select(row => row.Name));
     }
 }

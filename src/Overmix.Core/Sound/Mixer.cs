@@ -54,10 +54,14 @@ public sealed class Mixer
     {
         var game = _game.Current;
         var gameDial = new Dial(DialTarget.Game, game?.Program, game?.Name ?? "", game is null ? null : _sound.GetVolume(game.Program));
+
+        // The Game is usually an App too; its own Dial would be a second one for the same sound, so it waits.
         return
         [
             gameDial,
-            .. _apps.Items.Select(app => new Dial(DialTarget.For(app.Program), app.Program, app.Name, _sound.GetVolume(app.Program))),
+            .. _apps.Items
+                .Where(app => app.Program != game?.Program)
+                .Select(app => new Dial(DialTarget.For(app.Program), app.Program, app.Name, _sound.GetVolume(app.Program))),
         ];
     }
 }

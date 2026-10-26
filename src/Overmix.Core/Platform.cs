@@ -18,4 +18,6 @@ public sealed record Platform(
     IShortcutKeys ShortcutKeys,
     IStartWithWindows StartWithWindows,
     IGameFocus GameFocus,
-    IProgramIcons Icons);
+    IProgramIcons Icons,
+    IMuteChime MuteChime,
+    IMuteBorder MuteBorder);

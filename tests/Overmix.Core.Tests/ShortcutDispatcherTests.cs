@@ -89,7 +89,7 @@ public sealed class ShortcutDispatcherTests
 
     private (ShortcutDispatcher Dispatcher, MicMute MicMute) CreateDispatcher()
     {
-        var mixer = new Mixer(_pc.Sound, _apps, new GameTracker(_pc.MainScreen, _apps));
+        var mixer = new Mixer(_pc.Sound, _apps, new GameTracker(_pc.MainScreen));
         var micMute = new MicMute(_pc.Microphones);
         var dispatcher = new ShortcutDispatcher(
             _pc.ShortcutKeys, _apps, mixer, micMute, Shortcut.Parse("Ctrl+Alt+O"), Shortcut.Parse("Ctrl+Alt+M"));

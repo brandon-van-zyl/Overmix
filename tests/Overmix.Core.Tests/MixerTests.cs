@@ -102,6 +102,19 @@ public sealed class MixerTests
     }
 
     [Fact]
+    public void The_Games_own_App_Dial_waits_while_it_is_the_Game()
+    {
+        _apps.Add(new App(new("cs2"), "Counter-Strike 2"));
+        var mixer = CreateMixer();
+
+        _pc.MainScreen.Fill("cs2", "Counter-Strike 2");
+        Assert.Single(mixer.Dials, dial => dial.Program == new ProgramName("cs2"));
+
+        _pc.MainScreen.Quit("cs2");
+        Assert.Contains(mixer.Dials, dial => dial.Target == DialTarget.For(new("cs2")));
+    }
+
+    [Fact]
     public void The_Game_Dial_is_greyed_out_without_a_Game()
     {
         var mixer = CreateMixer();
@@ -110,7 +123,7 @@ public sealed class MixerTests
         Assert.Equal("", mixer.Dials[0].Name);
     }
 
-    private Mixer CreateMixer() => new(_pc.Sound, _apps, new GameTracker(_pc.MainScreen, _apps));
+    private Mixer CreateMixer() => new(_pc.Sound, _apps, new GameTracker(_pc.MainScreen));
 
     private static Dial DialFor(Mixer mixer, string program) =>
         mixer.Dials.Single(dial => dial.Target == DialTarget.For(new ProgramName(program)));

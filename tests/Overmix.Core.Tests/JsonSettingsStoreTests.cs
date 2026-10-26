@@ -25,13 +25,21 @@ public sealed class JsonSettingsStoreTests : IDisposable
     [Fact]
     public void Saved_settings_load_back_the_same()
     {
-        var saved = FakePc.SampleSettings() with { PanelOpen = false, PanelSpot = new WindowSpot(1920, 40), PopupShortcut = null };
+        var saved = FakePc.SampleSettings() with
+        {
+            RemovedApps = [new AppSettings("steamwebhelper", "Steam")],
+            PanelOpen = false,
+            PanelSpot = new WindowSpot(1920, 40),
+            PopupShortcut = null,
+            MuteChime = false,
+        };
 
         new JsonSettingsStore(SettingsPath).Save(saved);
         var loaded = new JsonSettingsStore(SettingsPath).Load();
 
         Assert.Equal(saved.Apps, loaded.Apps);
-        Assert.Equal(saved with { Apps = loaded.Apps }, loaded);
+        Assert.Equal(saved.RemovedApps, loaded.RemovedApps);
+        Assert.Equal(saved with { Apps = loaded.Apps, RemovedApps = loaded.RemovedApps }, loaded);
     }
 
     [Fact]

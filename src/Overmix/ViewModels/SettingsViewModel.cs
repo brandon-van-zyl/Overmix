@@ -22,26 +22,36 @@ public sealed partial class SettingsViewModel : ObservableObject
         _icons = icons;
         _close = close;
         VersionText = $"Overmix {version}";
-        core.Apps.Changed += (_, _) => SyncApps();
+        core.Apps.Changed += (_, _) => SyncApps(rebuild: false);
         core.Shortcuts.Changed += (_, _) => SyncShortcutWarning();
     }
 
     public ObservableCollection<AppRowViewModel> Apps { get; } = [];
 
-    public ObservableCollection<SoundProgram> ProgramsToAdd { get; } = [];
+    /// <summary>Apps you removed, which can be brought back with their old setup.</summary>
+    public ObservableCollection<App> RemovedApps { get; } = [];
 
     public ObservableCollection<SoundOutput> Outputs { get; } = [];
 
     public string VersionText { get; }
 
     [ObservableProperty]
-    public partial SoundProgram? SelectedProgram { get; set; }
+    public partial App? SelectedRemovedApp { get; set; }
+
+    [ObservableProperty]
+    public partial bool HasRemovedApps { get; private set; }
 
     [ObservableProperty]
     public partial Shortcut? PopupShortcut { get; set; }
 
     [ObservableProperty]
     public partial Shortcut? MicMuteShortcut { get; set; }
+
+    [ObservableProperty]
+    public partial bool MuteChime { get; set; }
+
+    [ObservableProperty]
+    public partial bool MuteBorder { get; set; }
 
     [ObservableProperty]
     public partial SoundOutput? FirstOutput { get; set; }
@@ -65,9 +75,6 @@ public sealed partial class SettingsViewModel : ObservableObject
         try
         {
             SyncApps(rebuild: true);
-            ProgramsToAdd.Clear();
-            foreach (var program in _core.ProgramsToAdd) ProgramsToAdd.Add(program);
-            SelectedProgram = ProgramsToAdd.FirstOrDefault();
 
             Outputs.Clear();
             foreach (var output in _core.OutputSwitch.Available) Outputs.Add(output);
@@ -76,6 +83,8 @@ public sealed partial class SettingsViewModel : ObservableObject
 
             PopupShortcut = _core.Shortcuts.PopupShortcut;
             MicMuteShortcut = _core.Shortcuts.MicMuteShortcut;
+            MuteChime = _core.MuteChimeOn;
+            MuteBorder = _core.MuteBorderOn;
             StartsWithWindows = _core.StartsWithWindows;
             SyncShortcutWarning();
         }
@@ -85,24 +94,21 @@ public sealed partial class SettingsViewModel : ObservableObject
         }
     }
 
-    /// <summary>Adds a program chosen with Browse.</summary>
+    /// <summary>Adds a program chosen with Browse, which can be done before it has ever played sound.</summary>
     public void AddProgramFile(string path)
     {
         var program = new ProgramName(Path.GetFileName(path));
         var description = FileVersionInfo.GetVersionInfo(path).FileDescription;
-        _core.Apps.Add(new App(program, string.IsNullOrWhiteSpace(description) ? program.Value : description.Trim()) { Path = path });
+        _core.AddApp(new App(program, string.IsNullOrWhiteSpace(description) ? program.Value : description.Trim()) { Path = path });
     }
 
     [RelayCommand]
     private void Done() => _close();
 
     [RelayCommand]
-    private void AddSelected()
+    private void BringBack()
     {
-        if (SelectedProgram is not { } program) return;
-        _core.Apps.Add(new App(program.Program, program.Name));
-        ProgramsToAdd.Remove(program);
-        SelectedProgram = ProgramsToAdd.FirstOrDefault();
+        if (SelectedRemovedApp is { } app) _core.AddApp(app);
     }
 
     partial void OnPopupShortcutChanged(Shortcut? value)
@@ -113,6 +119,16 @@ public sealed partial class SettingsViewModel : ObservableObject
     partial void OnMicMuteShortcutChanged(Shortcut? value)
     {
         if (!_loading) _core.Shortcuts.SetMicMuteShortcut(value);
+    }
+
+    partial void OnMuteChimeChanged(bool value)
+    {
+        if (!_loading) _core.MuteChimeOn = value;
+    }
+
+    partial void OnMuteBorderChanged(bool value)
+    {
+        if (!_loading) _core.MuteBorderOn = value;
     }
 
     partial void OnFirstOutputChanged(SoundOutput? value) => ChoosePair();
@@ -131,13 +147,15 @@ public sealed partial class SettingsViewModel : ObservableObject
             FirstOutput is { } first && SecondOutput is { } second && first.Id != second.Id ? new OutputPair(first.Id, second.Id) : null);
     }
 
-    private void SyncApps() => SyncApps(rebuild: false);
-
     private void SyncApps(bool rebuild)
     {
-        var apps = _core.Apps.Items;
+        RemovedApps.Clear();
+        foreach (var removed in _core.RemovedApps.OrderBy(app => app.Name, StringComparer.CurrentCultureIgnoreCase)) RemovedApps.Add(removed);
+        SelectedRemovedApp = RemovedApps.FirstOrDefault();
+        HasRemovedApps = RemovedApps.Count > 0;
 
         // Edits to a row change the App in place; only a different list of Apps needs new rows.
+        var apps = _core.Apps.Items;
         if (!rebuild && Apps.Select(row => row.Program).SequenceEqual(apps.Select(app => app.Program))) return;
         Apps.Clear();
         foreach (var app in apps) Apps.Add(new AppRowViewModel(_core, _icons, app));
@@ -148,7 +166,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         var taken = _core.Shortcuts.Unavailable;
         HasShortcutWarning = taken.Count > 0;
         ShortcutWarning = HasShortcutWarning
-            ? $"Another app already uses {string.Join(", ", taken)}. Pick a different one."
+            ? $"{string.Join(", ", taken)} can't be used. Pick a different one."
             : "";
     }
 }
@@ -183,8 +201,9 @@ public sealed partial class AppRowViewModel : ObservableObject
     [ObservableProperty]
     public partial Bitmap? Icon { get; private set; }
 
+    /// <summary>Removes the App for good; it won't be added again when it next plays sound.</summary>
     [RelayCommand]
-    private void Remove() => _core.Apps.Remove(_app.Program);
+    private void Remove() => _core.RemoveApp(_app.Program);
 
     partial void OnNameChanged(string value)
     {

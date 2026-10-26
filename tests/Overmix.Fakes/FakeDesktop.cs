@@ -1,5 +1,6 @@
 using Overmix.Core;
 using Overmix.Core.Settings;
+using Overmix.Core.Voice;
 
 namespace Overmix.Fakes;
 
@@ -19,6 +20,23 @@ public sealed class FakeGameFocus : IGameFocus
     public void Remember() => Remembered++;
 
     public void Return() => Returned++;
+}
+
+public sealed class FakeMuteChime : IMuteChime
+{
+    /// <summary>Every chime played: true for muting, false for unmuting.</summary>
+    public List<bool> Played { get; } = [];
+
+    public void Play(bool muted) => Played.Add(muted);
+}
+
+public sealed class FakeMuteBorder : IMuteBorder
+{
+    public bool IsShown { get; private set; }
+
+    public void Show() => IsShown = true;
+
+    public void Hide() => IsShown = false;
 }
 
 /// <summary>Settings kept in memory, so tests never touch the real settings file.</summary>

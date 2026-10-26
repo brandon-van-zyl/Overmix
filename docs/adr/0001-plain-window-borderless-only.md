@@ -10,4 +10,4 @@ The Overlay is an ordinary always-on-top window: it never injects into or hooks 
 ## Consequences
 
 - Anything drawn over the game stays small and shows only when needed. While it's visible, Windows may add about a frame of delay, depending on the graphics card.
-- The Overlay is never a full-screen transparent layer: that is exactly what wallhack overlays look like, and anti-cheat scans for them.
+- The Overlay is never a full-screen transparent layer: that is exactly what wallhack overlays look like, and anti-cheat scans for them. For the same reason the Mute Border is four thin solid strips along each screen's edges, not one see-through window over it.
