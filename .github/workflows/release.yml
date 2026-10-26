@@ -1,0 +1,66 @@
+name: Release
+
+# Every push to main builds Overmix on Windows, runs the tests, and publishes Overmix-win-Setup.exe as a
+# GitHub release. Running a newer Setup.exe installs over the old version and keeps your settings.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-latest
+    env:
+      REPO_URL: https://github.com/${{ github.repository }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Test
+        run: dotnet test Overmix.slnx -c Release
+
+      - name: Choose the version
+        id: version
+        # Minutes since 2026 began, so every build is newer than the last, matching build\pack.ps1.
+        run: |
+          $minutes = [int]([DateTime]::UtcNow - [DateTime]::new(2026, 1, 1, 0, 0, 0, [DateTimeKind]::Utc)).TotalMinutes
+          "number=0.1.$minutes" >> $env:GITHUB_OUTPUT
+
+      - name: Publish
+        run: >
+          dotnet publish src/Overmix/Overmix.csproj -c Release -r win-x64 --self-contained -o artifacts/publish
+          -p:Version=${{ steps.version.outputs.number }} -p:PublishReadyToRun=true
+
+      - name: Drop the drawing libraries' debug symbols
+        run: Get-ChildItem artifacts/publish -Filter *.pdb | Where-Object Name -NotLike 'Overmix*' | Remove-Item
+
+      - name: Restore vpk
+        run: dotnet tool restore
+
+      - name: Fetch the previous release, for a small update package
+        # There's none the first time.
+        continue-on-error: true
+        run: dotnet vpk download github --repoUrl $env:REPO_URL --token $env:GH_TOKEN --channel win --outputDir releases
+
+      - name: Pack
+        run: >
+          dotnet vpk pack --packId Overmix --packVersion ${{ steps.version.outputs.number }} --packTitle Overmix
+          --packDir artifacts/publish --mainExe Overmix.exe --runtime win-x64 --icon src/Overmix/Assets/overmix.ico
+          --shortcuts StartMenuRoot --channel win --outputDir releases
+
+      - name: Publish the release
+        run: >
+          dotnet vpk upload github --repoUrl $env:REPO_URL --token $env:GH_TOKEN --channel win --outputDir releases
+          --publish --releaseName "Overmix ${{ steps.version.outputs.number }}" --tag v${{ steps.version.outputs.number }}
+          --targetCommitish ${{ github.sha }}

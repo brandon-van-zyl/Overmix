@@ -1,0 +1,185 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:Overmix.Controls">
+
+  <Styles.Resources>
+    <SolidColorBrush x:Key="Surface" Color="#0F1218" />
+    <SolidColorBrush x:Key="Card" Color="#171B23" />
+    <SolidColorBrush x:Key="CardHover" Color="#1E232D" />
+    <SolidColorBrush x:Key="CardBorder" Color="#262C38" />
+    <SolidColorBrush x:Key="TextPrimary" Color="#E8ECF2" />
+    <SolidColorBrush x:Key="TextSecondary" Color="#8B93A3" />
+    <SolidColorBrush x:Key="Accent" Color="#22D3EE" />
+    <SolidColorBrush x:Key="AccentText" Color="#04131A" />
+    <SolidColorBrush x:Key="Track" Color="#2A3140" />
+    <SolidColorBrush x:Key="MutedSurface" Color="#3A0A13" />
+    <SolidColorBrush x:Key="MutedCard" Color="#4E0E1B" />
+    <SolidColorBrush x:Key="MutedBorder" Color="#7A1A2C" />
+    <SolidColorBrush x:Key="Muted" Color="#F43F5E" />
+    <SolidColorBrush x:Key="OverlayBackground" Color="#EB0F1218" />
+
+    <StreamGeometry x:Key="IconMic">M9,5.5 A3,3 0 0 1 15,5.5 V11.5 A3,3 0 0 1 9,11.5 Z M5.5,10.5 H7 A5,5 0 0 0 17,10.5 H18.5 A6.5,6.5 0 0 1 12.75,16.96 V19.5 H15.5 V21 H8.5 V19.5 H11.25 V16.96 A6.5,6.5 0 0 1 5.5,10.5 Z</StreamGeometry>
+    <StreamGeometry x:Key="IconMicOff">M9,5.5 A3,3 0 0 1 15,5.5 V11.5 A3,3 0 0 1 9,11.5 Z M5.5,10.5 H7 A5,5 0 0 0 17,10.5 H18.5 A6.5,6.5 0 0 1 12.75,16.96 V19.5 H15.5 V21 H8.5 V19.5 H11.25 V16.96 A6.5,6.5 0 0 1 5.5,10.5 Z M3.7,4.75 L4.75,3.7 L20.3,19.25 L19.25,20.3 Z</StreamGeometry>
+    <StreamGeometry x:Key="IconSettings">F1 M3,6.25 H21 V7.75 H3 Z M3,11.25 H21 V12.75 H3 Z M3,16.25 H21 V17.75 H3 Z M10.5,7 A2.5,2.5 0 1 1 5.5,7 A2.5,2.5 0 1 1 10.5,7 Z M18,12 A2.5,2.5 0 1 1 13,12 A2.5,2.5 0 1 1 18,12 Z M12.5,17 A2.5,2.5 0 1 1 7.5,17 A2.5,2.5 0 1 1 12.5,17 Z</StreamGeometry>
+    <StreamGeometry x:Key="IconSwap">M4,7.25 H16.6 L13.6,4.25 L14.65,3.2 L19.45,8 L14.65,12.8 L13.6,11.75 L16.6,8.75 H4 Z M20,15.25 H7.4 L10.4,12.25 L9.35,11.2 L4.55,16 L9.35,20.8 L10.4,19.75 L7.4,16.75 H20 Z</StreamGeometry>
+    <StreamGeometry x:Key="IconPlay">M8,5 L19,12 L8,19 Z</StreamGeometry>
+    <StreamGeometry x:Key="IconPause">M7,5 H10.5 V19 H7 Z M13.5,5 H17 V19 H13.5 Z</StreamGeometry>
+    <StreamGeometry x:Key="IconNext">M6,5 L15,12 L6,19 Z M16,5 H18.5 V19 H16 Z</StreamGeometry>
+    <StreamGeometry x:Key="IconPrevious">M18,5 L9,12 L18,19 Z M5.5,5 H8 V19 H5.5 Z</StreamGeometry>
+    <StreamGeometry x:Key="IconClose">M6.4,5.3 L12,10.9 L17.6,5.3 L18.7,6.4 L13.1,12 L18.7,17.6 L17.6,18.7 L12,13.1 L6.4,18.7 L5.3,17.6 L10.9,12 L5.3,6.4 Z</StreamGeometry>
+  </Styles.Resources>
+
+  <!-- Text -->
+  <Style Selector="TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+  </Style>
+  <Style Selector="TextBlock.wordmark">
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="LetterSpacing" Value="3" />
+  </Style>
+  <Style Selector="TextBlock.title">
+    <Setter Property="FontSize" Value="18" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style Selector="TextBlock.label">
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="LetterSpacing" Value="1.5" />
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+  </Style>
+  <Style Selector="TextBlock.value">
+    <Setter Property="FontSize" Value="15" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style Selector="TextBlock.secondary">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+  </Style>
+  <Style Selector="TextBlock.warning">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource Muted}" />
+  </Style>
+  <Style Selector="TextBlock.dialName">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="MaxWidth" Value="104" />
+    <Setter Property="TextAlignment" Value="Center" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+  </Style>
+  <Style Selector="TextBlock.dialTag">
+    <Setter Property="FontSize" Value="9" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="LetterSpacing" Value="1.5" />
+    <Setter Property="Foreground" Value="{DynamicResource Accent}" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+  </Style>
+
+  <!-- Dials -->
+  <Style Selector="controls|DialControl">
+    <Setter Property="Width" Value="88" />
+    <Setter Property="Height" Value="88" />
+    <Setter Property="Accent" Value="{DynamicResource Accent}" />
+    <Setter Property="TrackBrush" Value="{DynamicResource Track}" />
+    <Setter Property="TextBrush" Value="{DynamicResource TextPrimary}" />
+  </Style>
+
+  <!-- Cards -->
+  <Style Selector="Border.card">
+    <Setter Property="Background" Value="{DynamicResource Card}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource CardBorder}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="14" />
+    <Setter Property="Padding" Value="14,12" />
+  </Style>
+
+  <!-- Buttons -->
+  <Style Selector="Button.icon">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="8" />
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+  </Style>
+  <Style Selector="Button.icon PathIcon">
+    <Setter Property="Width" Value="18" />
+    <Setter Property="Height" Value="18" />
+  </Style>
+  <Style Selector="Button.pill">
+    <Setter Property="CornerRadius" Value="999" />
+    <Setter Property="Padding" Value="14,8" />
+    <Setter Property="Background" Value="{DynamicResource CardHover}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <!-- "primary", because Fluent already has an "accent" class that would win. -->
+  <Style Selector="Button.primary /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource Accent}" />
+    <Setter Property="Foreground" Value="{DynamicResource AccentText}" />
+  </Style>
+  <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#67E8F9" />
+    <Setter Property="Foreground" Value="{DynamicResource AccentText}" />
+  </Style>
+
+  <!-- Mic Mute: plain while live, loud red while muted -->
+  <Style Selector="Button.mic">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="Padding" Value="16,14" />
+    <Setter Property="CornerRadius" Value="14" />
+    <Setter Property="Background" Value="{DynamicResource Card}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource CardBorder}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+  </Style>
+  <Style Selector="Button.mic.muted">
+    <Setter Property="Background" Value="{DynamicResource Muted}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Muted}" />
+    <Setter Property="Foreground" Value="White" />
+  </Style>
+  <Style Selector="Button.mic.muted:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#FF5470" />
+    <Setter Property="Foreground" Value="White" />
+  </Style>
+  <Style Selector="Button.mic TextBlock.micState">
+    <Setter Property="FontSize" Value="16" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="LetterSpacing" Value="1.5" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{Binding $parent[Button].Foreground}" />
+  </Style>
+  <Style Selector="Button.mic TextBlock.secondary">
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.mic.muted TextBlock.secondary">
+    <Setter Property="Foreground" Value="#FFD5DC" />
+  </Style>
+
+  <!-- The whole Panel turns red while Mic Mute is on -->
+  <Style Selector="Window.muted">
+    <Setter Property="Background" Value="{DynamicResource MutedSurface}" />
+  </Style>
+  <Style Selector="Window.muted Border.card">
+    <Setter Property="Background" Value="{DynamicResource MutedCard}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource MutedBorder}" />
+  </Style>
+
+  <!-- Overlay strip -->
+  <Style Selector="Border.overlay">
+    <Setter Property="Background" Value="{DynamicResource OverlayBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource CardBorder}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="18" />
+    <Setter Property="BoxShadow" Value="0 10 30 0 #99000000" />
+  </Style>
+  <Style Selector="Border.overlay.muted">
+    <Setter Property="BorderBrush" Value="{DynamicResource Muted}" />
+    <Setter Property="BorderThickness" Value="2" />
+  </Style>
+  <Style Selector="Rectangle.divider">
+    <Setter Property="Width" Value="1" />
+    <Setter Property="Margin" Value="2,8" />
+    <Setter Property="Fill" Value="{DynamicResource CardBorder}" />
+  </Style>
+</Styles>

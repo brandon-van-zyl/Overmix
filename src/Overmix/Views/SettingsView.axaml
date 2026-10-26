@@ -1,0 +1,92 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Overmix.ViewModels"
+             xmlns:controls="using:Overmix.Controls"
+             xmlns:sound="using:Overmix.Core.Sound"
+             x:Class="Overmix.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+  <StackPanel Margin="16,8,16,20" Spacing="22">
+    <Grid ColumnDefinitions="*,Auto">
+      <TextBlock Classes="title" Text="Settings" VerticalAlignment="Center" Margin="4,0" />
+      <Button Grid.Column="1" Classes="pill primary" Content="Done" Command="{Binding DoneCommand}" />
+    </Grid>
+
+    <StackPanel Spacing="10">
+      <TextBlock Classes="label" Text="APPS" Margin="4,0" />
+      <ItemsControl ItemsSource="{Binding Apps}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:AppRowViewModel">
+            <Border Classes="card" Margin="0,0,0,8">
+              <StackPanel Spacing="10">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                  <Image Source="{Binding Icon}" Width="24" Height="24" VerticalAlignment="Center" />
+                  <TextBox Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=LostFocus}" Margin="10,0" />
+                  <Button Grid.Column="2" Classes="icon" Command="{Binding RemoveCommand}" ToolTip.Tip="Remove">
+                    <PathIcon Data="{StaticResource IconClose}" Width="12" Height="12" />
+                  </Button>
+                </Grid>
+                <Grid ColumnDefinitions="Auto,*,Auto,*">
+                  <TextBlock Classes="secondary" Text="Up" VerticalAlignment="Center" />
+                  <controls:ShortcutBox Grid.Column="1" Shortcut="{Binding VolumeUp}" Margin="8,0,12,0" />
+                  <TextBlock Grid.Column="2" Classes="secondary" Text="Down" VerticalAlignment="Center" />
+                  <controls:ShortcutBox Grid.Column="3" Shortcut="{Binding VolumeDown}" Margin="8,0,0,0" />
+                </Grid>
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <Grid ColumnDefinitions="*,Auto,Auto">
+        <ComboBox ItemsSource="{Binding ProgramsToAdd}" SelectedItem="{Binding SelectedProgram}"
+                  PlaceholderText="Programs playing sound now" HorizontalAlignment="Stretch">
+          <ComboBox.ItemTemplate>
+            <DataTemplate x:DataType="sound:SoundProgram">
+              <TextBlock Text="{Binding Name}" />
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+        <Button Grid.Column="1" Content="Add" Command="{Binding AddSelectedCommand}" Margin="8,0,0,0" />
+        <Button Grid.Column="2" Content="Browse…" Click="OnBrowse" Margin="8,0,0,0" />
+      </Grid>
+    </StackPanel>
+
+    <StackPanel Spacing="10">
+      <TextBlock Classes="label" Text="SHORTCUTS" Margin="4,0" />
+      <Grid ColumnDefinitions="96,*" RowDefinitions="Auto,Auto" RowSpacing="8">
+        <TextBlock Text="Popup" VerticalAlignment="Center" Margin="4,0" />
+        <controls:ShortcutBox Grid.Column="1" Shortcut="{Binding PopupShortcut}" />
+        <TextBlock Grid.Row="1" Text="Mic Mute" VerticalAlignment="Center" Margin="4,0" />
+        <controls:ShortcutBox Grid.Row="1" Grid.Column="1" Shortcut="{Binding MicMuteShortcut}" />
+      </Grid>
+      <TextBlock Classes="warning" Text="{Binding ShortcutWarning}" IsVisible="{Binding HasShortcutWarning}" TextWrapping="Wrap" />
+      <TextBlock Classes="secondary" TextWrapping="Wrap" Margin="4,0"
+                 Text="Click a box, then press the keys. Backspace clears it." />
+    </StackPanel>
+
+    <StackPanel Spacing="10">
+      <TextBlock Classes="label" Text="OUTPUT SWITCH" Margin="4,0" />
+      <ComboBox ItemsSource="{Binding Outputs}" SelectedItem="{Binding FirstOutput}" PlaceholderText="First output, like your headset"
+                HorizontalAlignment="Stretch">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="sound:SoundOutput">
+            <TextBlock Text="{Binding Name}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      <ComboBox ItemsSource="{Binding Outputs}" SelectedItem="{Binding SecondOutput}" PlaceholderText="Second output, like your speakers"
+                HorizontalAlignment="Stretch">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="sound:SoundOutput">
+            <TextBlock Text="{Binding Name}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+    </StackPanel>
+
+    <StackPanel Spacing="10">
+      <TextBlock Classes="label" Text="GENERAL" Margin="4,0" />
+      <ToggleSwitch IsChecked="{Binding StartsWithWindows}" OnContent="Start with Windows" OffContent="Start with Windows" Margin="4,0" />
+      <TextBlock Classes="secondary" Text="{Binding VersionText}" Margin="4,0" />
+    </StackPanel>
+  </StackPanel>
+</UserControl>

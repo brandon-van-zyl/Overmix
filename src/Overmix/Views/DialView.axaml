@@ -1,0 +1,17 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Overmix.ViewModels"
+             xmlns:controls="using:Overmix.Controls"
+             x:Class="Overmix.Views.DialView"
+             x:DataType="vm:DialViewModel">
+  <StackPanel Spacing="4" HorizontalAlignment="Center" Margin="0,4">
+    <controls:DialControl Value="{Binding Volume}"
+                          IsConnected="{Binding IsConnected}"
+                          Icon="{Binding Icon}"
+                          Monogram="{Binding Monogram}"
+                          ToolTip.Tip="{Binding Tip}"
+                          HorizontalAlignment="Center" />
+    <TextBlock Classes="dialName" Text="{Binding Name}" HorizontalAlignment="Center" />
+    <TextBlock Classes="dialTag" Text="GAME" IsVisible="{Binding IsGame}" />
+  </StackPanel>
+</UserControl>

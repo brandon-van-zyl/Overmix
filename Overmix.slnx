@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Overmix.Core/Overmix.Core.csproj" />
+    <Project Path="src/Overmix.WindowsPlatform/Overmix.WindowsPlatform.csproj" />
+    <Project Path="src/Overmix/Overmix.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Overmix.Core.Tests/Overmix.Core.Tests.csproj" />
+    <Project Path="tests/Overmix.Fakes/Overmix.Fakes.csproj" />
+    <Project Path="tests/Overmix.Tests/Overmix.Tests.csproj" />
+  </Folder>
+</Solution>

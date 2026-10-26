@@ -1,0 +1,67 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Overmix.ViewModels"
+        xmlns:views="using:Overmix.Views"
+        xmlns:controls="using:Overmix.Controls"
+        x:Class="Overmix.Views.OverlayWindow"
+        x:DataType="vm:OvermixViewModel"
+        Title="Overmix Overlay"
+        WindowDecorations="None"
+        Topmost="True"
+        ShowInTaskbar="False"
+        CanResize="False"
+        SizeToContent="WidthAndHeight"
+        TransparencyLevelHint="Transparent"
+        Background="Transparent">
+  <Window.Styles>
+    <Style Selector="controls|DialControl">
+      <Setter Property="Width" Value="64" />
+      <Setter Property="Height" Value="64" />
+    </Style>
+    <Style Selector="TextBlock.dialName">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="MaxWidth" Value="76" />
+    </Style>
+  </Window.Styles>
+
+  <!-- The margin leaves room for the shadow. -->
+  <Border x:Name="Strip" Classes="overlay" Classes.muted="{Binding IsMicMuted}" Padding="14,10" Margin="16">
+    <StackPanel Orientation="Horizontal" Spacing="12">
+      <ItemsControl ItemsSource="{Binding Dials}" VerticalAlignment="Center">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <StackPanel Orientation="Horizontal" Spacing="6" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:DialViewModel">
+            <views:DialView Width="84" />
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+      <Rectangle Classes="divider" />
+
+      <Button Classes="mic" Classes.muted="{Binding IsMicMuted}" Command="{Binding ToggleMicMuteCommand}"
+              HorizontalAlignment="Center" VerticalAlignment="Center" Padding="10" Width="104">
+        <StackPanel Spacing="4" HorizontalAlignment="Center">
+          <Panel Width="22" Height="22" HorizontalAlignment="Center">
+            <PathIcon Data="{StaticResource IconMic}" IsVisible="{Binding !IsMicMuted}" Width="20" Height="20" />
+            <PathIcon Data="{StaticResource IconMicOff}" IsVisible="{Binding IsMicMuted}" Width="20" Height="20" />
+          </Panel>
+          <TextBlock Classes="micState" Text="{Binding MicStateText}" FontSize="9" HorizontalAlignment="Center" />
+        </StackPanel>
+      </Button>
+
+      <Rectangle Classes="divider" IsVisible="{Binding HasTrack}" />
+
+      <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding HasTrack}" VerticalAlignment="Center">
+        <StackPanel VerticalAlignment="Center" MaxWidth="170" Spacing="2">
+          <TextBlock Classes="value" FontSize="13" Text="{Binding TrackTitle}" TextTrimming="CharacterEllipsis" />
+          <TextBlock Classes="secondary" Text="{Binding TrackArtist}" TextTrimming="CharacterEllipsis" />
+        </StackPanel>
+        <views:MediaButtons />
+      </StackPanel>
+    </StackPanel>
+  </Border>
+</Window>

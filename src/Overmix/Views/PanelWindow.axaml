@@ -1,0 +1,88 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Overmix.ViewModels"
+        xmlns:views="using:Overmix.Views"
+        x:Class="Overmix.Views.PanelWindow"
+        x:DataType="vm:OvermixViewModel"
+        Title="Overmix"
+        Icon="avares://Overmix/Assets/overmix.ico"
+        Width="392" Height="660" MinWidth="340" MinHeight="460"
+        ShowInTaskbar="False"
+        Background="{DynamicResource Surface}"
+        Classes.muted="{Binding IsMicMuted}">
+  <Grid RowDefinitions="Auto,*">
+    <Grid ColumnDefinitions="*,Auto" Margin="20,14,12,4">
+      <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+        <Image Source="avares://Overmix/Assets/overmix.png" Width="22" Height="22" />
+        <TextBlock Classes="wordmark" Text="OVERMIX" VerticalAlignment="Center" />
+      </StackPanel>
+      <Button Grid.Column="1" Classes="icon" Command="{Binding ToggleSettingsCommand}" ToolTip.Tip="Settings">
+        <PathIcon Data="{StaticResource IconSettings}" />
+      </Button>
+    </Grid>
+
+    <ScrollViewer Grid.Row="1" IsVisible="{Binding !IsSettingsOpen}">
+      <StackPanel Margin="16,8,16,20" Spacing="16">
+        <Button Classes="mic" Classes.muted="{Binding IsMicMuted}" Command="{Binding ToggleMicMuteCommand}">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <Panel Width="24" Height="24" VerticalAlignment="Center">
+              <PathIcon Data="{StaticResource IconMic}" IsVisible="{Binding !IsMicMuted}" Width="22" Height="22" />
+              <PathIcon Data="{StaticResource IconMicOff}" IsVisible="{Binding IsMicMuted}" Width="22" Height="22" />
+            </Panel>
+            <TextBlock Grid.Column="1" Classes="micState" Text="{Binding MicStateText}" Margin="12,0" />
+            <TextBlock Grid.Column="2" Classes="secondary" Text="{Binding MicMuteShortcutText}" />
+          </Grid>
+        </Button>
+
+        <StackPanel Spacing="6">
+          <TextBlock Classes="label" Text="VOLUME" Margin="4,0" />
+          <ItemsControl ItemsSource="{Binding Dials}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <WrapPanel ItemWidth="118" HorizontalAlignment="Center" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:DialViewModel">
+                <views:DialView />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock Classes="secondary" IsVisible="{Binding HasNoApps}" TextWrapping="Wrap" TextAlignment="Center" Margin="12,4"
+                     Text="Add Discord, Spotify and your other apps in Settings to give each one a Dial." />
+        </StackPanel>
+
+        <Border Classes="card">
+          <Grid ColumnDefinitions="*,Auto">
+            <StackPanel Spacing="3" VerticalAlignment="Center">
+              <TextBlock Classes="label" Text="OUTPUT" />
+              <TextBlock Classes="value" Text="{Binding CurrentOutputName}" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+            <Button Grid.Column="1" Classes="pill" Command="{Binding FlipOutputCommand}" IsEnabled="{Binding CanFlipOutput}"
+                    VerticalAlignment="Center" ToolTip.Tip="Switch output">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <PathIcon Data="{StaticResource IconSwap}" Width="16" Height="16" />
+                <TextBlock Text="{Binding OtherOutputName}" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+          </Grid>
+        </Border>
+
+        <Border Classes="card" IsVisible="{Binding HasTrack}">
+          <Grid ColumnDefinitions="*,Auto">
+            <StackPanel Spacing="3" VerticalAlignment="Center">
+              <TextBlock Classes="label" Text="NOW PLAYING" />
+              <TextBlock Classes="value" Text="{Binding TrackTitle}" TextTrimming="CharacterEllipsis" />
+              <TextBlock Classes="secondary" Text="{Binding TrackArtist}" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+            <views:MediaButtons Grid.Column="1" />
+          </Grid>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+
+    <ScrollViewer Grid.Row="1" IsVisible="{Binding IsSettingsOpen}">
+      <views:SettingsView DataContext="{Binding Settings}" />
+    </ScrollViewer>
+  </Grid>
+</Window>
