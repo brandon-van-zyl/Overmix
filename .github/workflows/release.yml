@@ -32,10 +32,12 @@ jobs:
 
       - name: Choose the version
         id: version
-        # Minutes since 2026 began, so every build is newer than the last, matching build\pack.ps1.
+        # 0.<days since 2026>.<minute of the day>, so every build is newer than the last, matching build\pack.ps1.
+        # Windows version numbers can't go past 65535 in any part, which rules out a single running count of minutes.
         run: |
-          $minutes = [int]([DateTime]::UtcNow - [DateTime]::new(2026, 1, 1, 0, 0, 0, [DateTimeKind]::Utc)).TotalMinutes
-          "number=0.1.$minutes" >> $env:GITHUB_OUTPUT
+          $now = [DateTime]::UtcNow
+          $days = [int][Math]::Floor(($now - [DateTime]::new(2026, 1, 1, 0, 0, 0, [DateTimeKind]::Utc)).TotalDays)
+          "number=0.$days.$($now.Hour * 60 + $now.Minute)" >> $env:GITHUB_OUTPUT
 
       - name: Publish
         run: >

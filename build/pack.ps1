@@ -27,8 +27,10 @@ $publish = Join-Path $root 'artifacts\publish'
 $fullPackagesToKeep = 2
 
 if (-not $Version) {
-    $minutes = [int]([DateTime]::UtcNow - [DateTime]::new(2026, 1, 1, 0, 0, 0, [DateTimeKind]::Utc)).TotalMinutes
-    $Version = "0.1.$minutes"
+    # 0.<days since 2026>.<minute of the day>. Windows version numbers can't go past 65535 in any part.
+    $now = [DateTime]::UtcNow
+    $days = [int][Math]::Floor(($now - [DateTime]::new(2026, 1, 1, 0, 0, 0, [DateTimeKind]::Utc)).TotalDays)
+    $Version = "0.$days.$($now.Hour * 60 + $now.Minute)"
 }
 
 Push-Location $root
